@@ -5,6 +5,12 @@ import { pipeline, env } from '@huggingface/transformers';
 // @ts-ignore - Using undocumented property that exists in runtime
 env.backendType = 'wasm';
 
+// Create a custom type that extends the original options to include the quantized property
+interface ExtendedPipelineOptions {
+  quantized?: boolean;
+  [key: string]: any;
+}
+
 class ImageClassifierService {
   private classifier: any = null;
   private isLoading: boolean = false;
@@ -32,11 +38,12 @@ class ImageClassifierService {
     try {
       console.log(`Cargando modelo de clasificación de imágenes: ${this.modelId}...`);
       
-      // @ts-ignore - quantized is supported at runtime but not in type definitions
+      const options: ExtendedPipelineOptions = { quantized: true }; // Usar versión cuantizada para mejor rendimiento en el navegador
+      
       this.classifier = await pipeline(
         'image-classification',
         this.modelId,
-        { quantized: true } // Usar versión cuantizada para mejor rendimiento en el navegador
+        options
       );
       
       console.log('Modelo cargado exitosamente');
@@ -47,11 +54,13 @@ class ImageClassifierService {
       try {
         console.log('Intentando cargar modelo alternativo...');
         this.modelId = 'google/vit-base-patch16-224';
-        // @ts-ignore - quantized is supported at runtime but not in type definitions
+        
+        const fallbackOptions: ExtendedPipelineOptions = { quantized: true };
+        
         this.classifier = await pipeline(
           'image-classification',
           this.modelId,
-          { quantized: true }
+          fallbackOptions
         );
         console.log('Modelo alternativo cargado exitosamente');
       } catch (fallbackError) {
