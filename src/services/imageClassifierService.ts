@@ -1,4 +1,3 @@
-
 import { pipeline, env } from '@huggingface/transformers';
 
 // Set the backend to WASM to run in browser
@@ -9,7 +8,7 @@ class ImageClassifierService {
   private classifier: any = null;
   private isLoading: boolean = false;
   private loadingPromise: Promise<void> | null = null;
-  private modelId: string = 'onnx-community/mobilenetv4_conv_small.e2400_r224_in1k'; // Modelo compatible con transformers.js
+  private modelId: string = 'Xenova/vit-base-patch16-224'; // Modelo compatible con transformers.js
 
   async getClassifier() {
     if (this.classifier) {
@@ -41,7 +40,7 @@ class ImageClassifierService {
     } catch (error) {
       console.error('Error al cargar el modelo:', error);
       
-      // Fallback a otro modelo en caso de error
+      // Fallback a un modelo más simple y ligero
       try {
         console.log('Intentando cargar modelo alternativo...');
         this.modelId = 'Xenova/clip-vit-base-patch16';

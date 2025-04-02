@@ -3,7 +3,8 @@ import React, { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { InfoIcon, GalleryHorizontalIcon, BrainIcon } from 'lucide-react';
+import { InfoIcon, GalleryHorizontalIcon, BrainIcon, RefreshCw } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 import ImageUploader from './ImageUploader';
 import PredictionResults from './PredictionResults';
@@ -28,25 +29,29 @@ const ImageClassifier: React.FC = () => {
   const [predictions, setPredictions] = useState<Prediction[]>([]);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isModelLoading, setIsModelLoading] = useState(true);
+  const [modelLoadError, setModelLoadError] = useState(false);
   const [recentImages, setRecentImages] = useState<ImageInfo[]>([]);
   const [currentImageUrl, setCurrentImageUrl] = useState<string | null>(null);
   const [modelName, setModelName] = useState<string>('');
 
+  const loadModel = async () => {
+    setIsModelLoading(true);
+    setModelLoadError(false);
+    try {
+      await imageClassifierService.getClassifier();
+      setModelName(imageClassifierService.getModelName());
+      setIsModelLoading(false);
+      toast.success(`Modelo cargado: ${imageClassifierService.getModelName()}`);
+    } catch (error) {
+      console.error('Error loading model:', error);
+      setIsModelLoading(false);
+      setModelLoadError(true);
+      toast.error('Error al cargar el modelo. Inténtalo de nuevo.');
+    }
+  };
+
   // Initialize model on component mount
   useEffect(() => {
-    const loadModel = async () => {
-      try {
-        await imageClassifierService.getClassifier();
-        setModelName(imageClassifierService.getModelName());
-        setIsModelLoading(false);
-        toast.success(`Modelo cargado: ${imageClassifierService.getModelName()}`);
-      } catch (error) {
-        toast.error('Error al cargar el modelo. Inténtalo de nuevo.');
-        console.error('Error loading model:', error);
-        setIsModelLoading(false);
-      }
-    };
-
     loadModel();
   }, []);
 
@@ -60,6 +65,11 @@ const ImageClassifier: React.FC = () => {
       setCurrentImageUrl(imageUrl);
       setPredictions([]);
       setIsAnalyzing(true);
+
+      // If model isn't loaded, try loading it again
+      if (modelLoadError) {
+        await loadModel();
+      }
 
       const results = await imageClassifierService.classifyImage(file);
       setPredictions(results);
@@ -126,13 +136,27 @@ const ImageClassifier: React.FC = () => {
             <Card>
               <CardContent className="p-6">
                 <h3 className="text-lg font-medium mb-4">Subir imagen</h3>
-                <ImageUploader onImageSelected={handleImageSelected} />
+                {modelLoadError ? (
+                  <div className="text-center py-4">
+                    <p className="text-destructive mb-4">Error al cargar el modelo de IA</p>
+                    <Button 
+                      variant="outline" 
+                      onClick={loadModel} 
+                      className="flex items-center gap-2"
+                    >
+                      <RefreshCw className="h-4 w-4" />
+                      Reintentar cargar modelo
+                    </Button>
+                  </div>
+                ) : (
+                  <ImageUploader onImageSelected={handleImageSelected} />
+                )}
                 {isModelLoading && (
                   <div className="mt-4 text-center text-sm text-muted-foreground animate-pulse-light">
                     Cargando modelo de IA... esto puede tomar un momento
                   </div>
                 )}
-                {modelName && !isModelLoading && (
+                {modelName && !isModelLoading && !modelLoadError && (
                   <div className="mt-4 text-center text-xs text-muted-foreground">
                     Modelo: {modelName}
                   </div>
@@ -203,7 +227,7 @@ const ImageClassifier: React.FC = () => {
               
               <h3 className="text-xl font-semibold mt-6 mb-3">Cómo funciona</h3>
               <p className="mb-4">
-                El modelo utilizado es {modelName || 'ResNet-50'}, entrenado con el dataset ImageNet que puede reconocer más de 1000 clases diferentes de objetos. La aplicación muestra las 10 clases más probables para cada imagen analizada.
+                El modelo utilizado es {modelName || 'ViT'}, entrenado para reconocer numerosas clases diferentes de objetos. La aplicación muestra las categorías más probables para cada imagen analizada.
               </p>
               
               <h3 className="text-xl font-semibold mt-6 mb-3">Limitaciones</h3>
