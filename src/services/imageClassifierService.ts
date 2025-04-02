@@ -5,17 +5,11 @@ import { pipeline, env } from '@huggingface/transformers';
 // @ts-ignore - Using undocumented property that exists in runtime
 env.backendType = 'wasm';
 
-// Create a custom type that extends the original options to include the quantized property
-interface ExtendedPipelineOptions {
-  quantized?: boolean;
-  [key: string]: any;
-}
-
 class ImageClassifierService {
   private classifier: any = null;
   private isLoading: boolean = false;
   private loadingPromise: Promise<void> | null = null;
-  private modelId: string = 'microsoft/resnet-50'; // Modelo más preciso que MobileNetV4
+  private modelId: string = 'onnx-community/mobilenetv4_conv_small.e2400_r224_in1k'; // Modelo compatible con transformers.js
 
   async getClassifier() {
     if (this.classifier) {
@@ -38,12 +32,9 @@ class ImageClassifierService {
     try {
       console.log(`Cargando modelo de clasificación de imágenes: ${this.modelId}...`);
       
-      const options: ExtendedPipelineOptions = { quantized: true }; // Usar versión cuantizada para mejor rendimiento en el navegador
-      
       this.classifier = await pipeline(
         'image-classification',
-        this.modelId,
-        options
+        this.modelId
       );
       
       console.log('Modelo cargado exitosamente');
@@ -53,14 +44,11 @@ class ImageClassifierService {
       // Fallback a otro modelo en caso de error
       try {
         console.log('Intentando cargar modelo alternativo...');
-        this.modelId = 'google/vit-base-patch16-224';
-        
-        const fallbackOptions: ExtendedPipelineOptions = { quantized: true };
+        this.modelId = 'Xenova/clip-vit-base-patch16';
         
         this.classifier = await pipeline(
           'image-classification',
-          this.modelId,
-          fallbackOptions
+          this.modelId
         );
         console.log('Modelo alternativo cargado exitosamente');
       } catch (fallbackError) {
