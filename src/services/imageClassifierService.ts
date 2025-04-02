@@ -2,6 +2,7 @@
 import { pipeline, env } from '@huggingface/transformers';
 
 // Set the backend to WASM to run in browser
+// @ts-ignore - Using undocumented property that exists in runtime
 env.backendType = 'wasm';
 
 class ImageClassifierService {
