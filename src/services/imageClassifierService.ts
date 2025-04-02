@@ -32,6 +32,7 @@ class ImageClassifierService {
     try {
       console.log(`Cargando modelo de clasificación de imágenes: ${this.modelId}...`);
       
+      // @ts-ignore - quantized is supported at runtime but not in type definitions
       this.classifier = await pipeline(
         'image-classification',
         this.modelId,
@@ -46,6 +47,7 @@ class ImageClassifierService {
       try {
         console.log('Intentando cargar modelo alternativo...');
         this.modelId = 'google/vit-base-patch16-224';
+        // @ts-ignore - quantized is supported at runtime but not in type definitions
         this.classifier = await pipeline(
           'image-classification',
           this.modelId,
