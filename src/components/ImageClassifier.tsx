@@ -30,13 +30,16 @@ const ImageClassifier: React.FC = () => {
   const [isModelLoading, setIsModelLoading] = useState(true);
   const [recentImages, setRecentImages] = useState<ImageInfo[]>([]);
   const [currentImageUrl, setCurrentImageUrl] = useState<string | null>(null);
+  const [modelName, setModelName] = useState<string>('');
 
   // Initialize model on component mount
   useEffect(() => {
     const loadModel = async () => {
       try {
         await imageClassifierService.getClassifier();
+        setModelName(imageClassifierService.getModelName());
         setIsModelLoading(false);
+        toast.success(`Modelo cargado: ${imageClassifierService.getModelName()}`);
       } catch (error) {
         toast.error('Error al cargar el modelo. Inténtalo de nuevo.');
         console.error('Error loading model:', error);
@@ -129,6 +132,11 @@ const ImageClassifier: React.FC = () => {
                     Cargando modelo de IA... esto puede tomar un momento
                   </div>
                 )}
+                {modelName && !isModelLoading && (
+                  <div className="mt-4 text-center text-xs text-muted-foreground">
+                    Modelo: {modelName}
+                  </div>
+                )}
               </CardContent>
             </Card>
 
@@ -195,7 +203,7 @@ const ImageClassifier: React.FC = () => {
               
               <h3 className="text-xl font-semibold mt-6 mb-3">Cómo funciona</h3>
               <p className="mb-4">
-                El modelo utilizado es MobileNetV4, entrenado con el dataset ImageNet que puede reconocer más de 1000 clases diferentes de objetos. La aplicación muestra las 10 clases más probables para cada imagen analizada.
+                El modelo utilizado es {modelName || 'ResNet-50'}, entrenado con el dataset ImageNet que puede reconocer más de 1000 clases diferentes de objetos. La aplicación muestra las 10 clases más probables para cada imagen analizada.
               </p>
               
               <h3 className="text-xl font-semibold mt-6 mb-3">Limitaciones</h3>
