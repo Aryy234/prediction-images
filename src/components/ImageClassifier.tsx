@@ -1,24 +1,29 @@
+
 import React, { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { InfoIcon, GalleryHorizontalIcon, BrainIcon, RefreshCw } from 'lucide-react';
+import { InfoIcon, BrainIcon, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import ImageUploader from './ImageUploader';
 import PredictionResults from './PredictionResults';
 import RecentImages from './RecentImages';
 import { imageClassifierService } from '@/services/imageClassifierService';
+
 interface Prediction {
   label: string;
   score: number;
 }
+
 interface ImageInfo {
   id: string;
   url: string;
   topPrediction: string;
   timestamp: number;
 }
+
 const MAX_RECENT_IMAGES = 10;
+
 const ImageClassifier: React.FC = () => {
   const [predictions, setPredictions] = useState<Prediction[]>([]);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -27,6 +32,7 @@ const ImageClassifier: React.FC = () => {
   const [recentImages, setRecentImages] = useState<ImageInfo[]>([]);
   const [currentImageUrl, setCurrentImageUrl] = useState<string | null>(null);
   const [modelName, setModelName] = useState<string>('');
+
   const loadModel = async () => {
     setIsModelLoading(true);
     setModelLoadError(false);
@@ -47,6 +53,7 @@ const ImageClassifier: React.FC = () => {
   useEffect(() => {
     loadModel();
   }, []);
+
   const handleImageSelected = async (file: File) => {
     try {
       if (currentImageUrl) {
@@ -83,6 +90,7 @@ const ImageClassifier: React.FC = () => {
       setIsAnalyzing(false);
     }
   };
+
   const handleSelectRecentImage = (url: string) => {
     const imageInfo = recentImages.find(img => img.url === url);
     if (!imageInfo) return;
@@ -98,16 +106,14 @@ const ImageClassifier: React.FC = () => {
       toast.error('Error al cargar la imagen.');
     });
   };
-  return <div className="w-full max-w-4xl mx-auto">
+
+  return (
+    <div className="w-full max-w-4xl mx-auto">
       <Tabs defaultValue="classifier" className="w-full">
-        <TabsList className="grid w-full grid-cols-3 mb-6">
+        <TabsList className="grid w-full grid-cols-2 mb-6">
           <TabsTrigger value="classifier" className="flex items-center gap-2">
             <BrainIcon className="h-4 w-4" />
             <span>Clasificador</span>
-          </TabsTrigger>
-          <TabsTrigger value="gallery" className="flex items-center gap-2">
-            <GalleryHorizontalIcon className="h-4 w-4" />
-            <span>Galería</span>
           </TabsTrigger>
           <TabsTrigger value="about" className="flex items-center gap-2">
             <InfoIcon className="h-4 w-4" />
@@ -120,19 +126,27 @@ const ImageClassifier: React.FC = () => {
             <Card>
               <CardContent className="p-6">
                 <h3 className="text-lg font-medium mb-4">Subir imagen</h3>
-                {modelLoadError ? <div className="text-center py-4">
+                {modelLoadError ? (
+                  <div className="text-center py-4">
                     <p className="text-destructive mb-4">Error al cargar el modelo de IA</p>
                     <Button variant="outline" onClick={loadModel} className="flex items-center gap-2">
                       <RefreshCw className="h-4 w-4" />
                       Reintentar cargar modelo
                     </Button>
-                  </div> : <ImageUploader onImageSelected={handleImageSelected} />}
-                {isModelLoading && <div className="mt-4 text-center text-sm text-muted-foreground animate-pulse-light">
+                  </div>
+                ) : (
+                  <ImageUploader onImageSelected={handleImageSelected} />
+                )}
+                {isModelLoading && (
+                  <div className="mt-4 text-center text-sm text-muted-foreground animate-pulse-light">
                     Cargando modelo de IA... esto puede tomar un momento
-                  </div>}
-                {modelName && !isModelLoading && !modelLoadError && <div className="mt-4 text-center text-xs text-muted-foreground">
+                  </div>
+                )}
+                {modelName && !isModelLoading && !modelLoadError && (
+                  <div className="mt-4 text-center text-xs text-muted-foreground">
                     Modelo: {modelName}
-                  </div>}
+                  </div>
+                )}
               </CardContent>
             </Card>
 
@@ -141,30 +155,16 @@ const ImageClassifier: React.FC = () => {
             </Card>
           </div>
 
-          {recentImages.length > 0 && <Card className="mt-6">
-              
-            </Card>}
-        </TabsContent>
-
-        <TabsContent value="gallery">
-          <Card>
-            <CardContent className="p-6">
-              {recentImages.length > 0 ? <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                  {recentImages.map(image => <div key={image.id} className="aspect-square rounded-md overflow-hidden cursor-pointer relative group" onClick={() => handleSelectRecentImage(image.url)}>
-                      <img src={image.url} alt={image.topPrediction} className="w-full h-full object-cover transition-transform group-hover:scale-105" />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3">
-                        <span className="text-sm text-white font-medium">
-                          {image.topPrediction.split(',')[0]}
-                        </span>
-                      </div>
-                    </div>)}
-                </div> : <div className="text-center py-12">
-                  <GalleryHorizontalIcon className="mx-auto h-12 w-12 text-muted-foreground/50 mb-4" />
-                  <h3 className="text-lg font-medium">No hay imágenes recientes</h3>
-                  <p className="text-muted-foreground">Las imágenes analizadas aparecerán aquí</p>
-                </div>}
-            </CardContent>
-          </Card>
+          {recentImages.length > 0 && (
+            <Card className="mt-6">
+              <CardContent className="p-6">
+                <RecentImages
+                  images={recentImages}
+                  onSelectImage={handleSelectRecentImage}
+                />
+              </CardContent>
+            </Card>
+          )}
         </TabsContent>
 
         <TabsContent value="about">
@@ -193,6 +193,8 @@ const ImageClassifier: React.FC = () => {
           </Card>
         </TabsContent>
       </Tabs>
-    </div>;
+    </div>
+  );
 };
+
 export default ImageClassifier;
