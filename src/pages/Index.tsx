@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import ImageClassifier from '@/components/ImageClassifier';
 
@@ -14,23 +13,23 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50">
-      <header className="w-full py-6 px-4 text-center">
-        <h1 className="text-3xl md:text-4xl font-bold bg-clip-text text-transparent gradient-bg inline-block">
-          Clasificador de Imágenes con IA
+    <div className="min-h-screen bg-white dark:bg-slate-950">
+      <header className="w-full pt-10 pb-6 px-4 text-center">
+        <h1 className="text-3xl font-medium text-slate-900 dark:text-slate-100">
+          Clasificador de Imágenes
         </h1>
-        <p className="mt-2 text-muted-foreground max-w-md mx-auto">
-          Sube una imagen y el sistema predecirá la categoría a la que pertenece
+        <p className="mt-2 text-slate-500 dark:text-slate-400 max-w-md mx-auto text-sm">
+          Sube una imagen y el sistema predecirá su categoría
         </p>
       </header>
 
-      <main className="container py-6 px-4 mb-20">
+      <main className="container py-6 px-4 mb-16">
         <ImageClassifier />
       </main>
       
-      <footer className="fixed bottom-0 w-full py-4 bg-white/80 backdrop-blur-sm border-t">
-        <div className="container text-center text-sm text-muted-foreground">
-          Usando un modelo pre-entrenado para reconocer clases de imágenes | Procesamiento realizado en el navegador
+      <footer className="fixed bottom-0 w-full py-3 bg-white/50 dark:bg-slate-950/50 backdrop-blur-sm border-t border-slate-100 dark:border-slate-800">
+        <div className="container text-center text-xs text-slate-400 dark:text-slate-500">
+          Usando modelo pre-entrenado | Procesamiento en navegador
         </div>
       </footer>
     </div>

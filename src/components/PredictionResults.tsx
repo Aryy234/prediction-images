@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
@@ -31,24 +30,18 @@ const PredictionResults: React.FC<PredictionResultsProps> = ({
       .join(' ');
   };
 
-  // Get a color based on score - from green (high) to red (low)
-  const getColorClass = (score: number) => {
-    if (score > 0.7) return 'bg-green-500';
-    if (score > 0.4) return 'bg-blue-500';
-    if (score > 0.2) return 'bg-yellow-500';
-    return 'bg-red-500';
-  };
-
   if (isLoading) {
     return (
-      <div className={cn("p-6", className)}>
-        <h3 className="text-lg font-medium mb-4">Analizando imagen...</h3>
-        {[...Array(5)].map((_, index) => (
-          <div key={index} className="mb-3 animate-pulse">
-            <div className="h-5 bg-muted rounded mb-1 w-1/3"></div>
-            <div className="h-3 bg-muted rounded w-full"></div>
-          </div>
-        ))}
+      <div className={cn("p-4", className)}>
+        <h3 className="text-sm font-medium text-slate-900 dark:text-slate-100 mb-3">Analizando imagen</h3>
+        <div className="space-y-3">
+          {[...Array(3)].map((_, index) => (
+            <div key={index} className="animate-pulse">
+              <div className="h-4 bg-slate-100 dark:bg-slate-800 rounded mb-1 w-1/3"></div>
+              <div className="h-2 bg-slate-100 dark:bg-slate-800 rounded w-full"></div>
+            </div>
+          ))}
+        </div>
       </div>
     );
   }
@@ -58,20 +51,20 @@ const PredictionResults: React.FC<PredictionResultsProps> = ({
   }
 
   return (
-    <div className={cn("p-6", className)}>
-      <h3 className="text-lg font-medium mb-4">Resultados de la predicción</h3>
+    <div className={cn("p-4", className)}>
+      <h3 className="text-sm font-medium text-slate-900 dark:text-slate-100 mb-3">Resultados</h3>
       <div className="space-y-3">
-        {predictions.map((prediction, index) => (
+        {predictions.slice(0, 5).map((prediction, index) => (
           <div key={index} className="animate-fade-in" style={{ animationDelay: `${index * 0.05}s` }}>
             <div className="flex justify-between items-center mb-1">
-              <span className="font-medium">{formatLabel(prediction.label)}</span>
-              <span className="text-sm font-mono">
-                {(prediction.score * 100).toFixed(1)}%
+              <span className="text-sm text-slate-800 dark:text-slate-200">{formatLabel(prediction.label)}</span>
+              <span className="text-xs text-slate-500 dark:text-slate-400">
+                {(prediction.score * 100).toFixed(0)}%
               </span>
             </div>
             <Progress 
               value={prediction.score * 100} 
-              className={cn("h-2", getColorClass(prediction.score))}
+              className="h-1 bg-slate-100 dark:bg-slate-800"
             />
           </div>
         ))}
